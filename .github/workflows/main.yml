@@ -1,0 +1,35 @@
+name: PR Check
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  validate:
+    name: Validar estrutura do projeto
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Verificar arquivos principais
+        run: |
+          test -f index.html || (echo "index.html não encontrado" && exit 1)
+          test -f assets/css/style.css || (echo "assets/css/style.css não encontrado" && exit 1)
+
+      - name: Validar HTML básico
+        run: |
+          grep -q "<!DOCTYPE html>" index.html || (echo "DOCTYPE ausente em index.html" && exit 1)
+          grep -q "<html" index.html || (echo "Tag <html> ausente em index.html" && exit 1)
+          grep -q "<head>" index.html || (echo "Tag <head> ausente em index.html" && exit 1)
+          grep -q "<body>" index.html || (echo "Tag <body> ausente em index.html" && exit 1)
+
+      - name: Resumo
+        run: echo "Validação concluída com sucesso para PR na branch main."
