@@ -31,5 +31,26 @@ jobs:
           grep -q "<head>" index.html || (echo "Tag <head> ausente em index.html" && exit 1)
           grep -q "<body>" index.html || (echo "Tag <body> ausente em index.html" && exit 1)
 
+      - name: Validar separação entre HTML e CSS
+        run: |
+          html_files=$(find . -type f -name "*.html")
+
+          if [ -z "$html_files" ]; then
+            echo "Nenhum arquivo HTML encontrado para validação"
+            exit 1
+          fi
+
+          for file in $html_files; do
+            if grep -Eq "<style[[:space:]>]" "$file"; then
+              echo "CSS dentro de <style> não é permitido em $file. Use arquivos .css separados"
+              exit 1
+            fi
+
+            if grep -Eq 'style[[:space:]]*=' "$file"; then
+              echo "Atributo style inline não é permitido em $file. Use classes CSS em arquivos .css"
+              exit 1
+            fi
+          done
+
       - name: Resumo
         run: echo "Validação concluída com sucesso para PR na branch main."
